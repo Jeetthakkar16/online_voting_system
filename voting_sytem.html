@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Online Voting System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+      color: #333;
+    }
+
+    header {
+      background: #2d89e5;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      padding: 2rem;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-top: 2rem;
+      border-radius: 10px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #2d89e5;
+    }
+
+    .candidate {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 1rem 0;
+      padding: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
+    .candidate button {
+      padding: 0.5rem 1rem;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .candidate button:disabled {
+      background: gray;
+      cursor: not-allowed;
+    }
+
+    .progress-container {
+      margin-top: 2rem;
+    }
+
+    .progress-bar {
+      height: 24px;
+      background: #2d89e5;
+      color: white;
+      text-align: center;
+      line-height: 24px;
+      border-radius: 5px;
+    }
+
+    .admin-section {
+      margin-top: 3rem;
+      padding: 1rem;
+      background: #f9f9f9;
+      border: 1px dashed #ccc;
+    }
+
+    .admin-section h3 {
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Online Voting System</h1>
+</header>
+
+<div class="container">
+  <h2>Vote for Your Favorite Candidate</h2>
+
+  <div id="voter-panel">
+    <div class="candidate">
+      <span>Candidate A</span>
+      <button id="voteA">Vote</button>
+    </div>
+    <div class="candidate">
+      <span>Candidate B</span>
+      <button id="voteB">Vote</button>
+    </div>
+    <div class="candidate">
+      <span>Candidate C</span>
+      <button id="voteC">Vote</button>
+    </div>
+  </div>
+
+  <div class="progress-container">
+    <h2>Live Results</h2>
+    <p>Candidate A: <span id="countA">0</span> votes</p>
+    <div style="background:#eee; border-radius:5px;">
+      <div id="barA" class="progress-bar" style="width:0%">0%</div>
+    </div>
+
+    <p>Candidate B: <span id="countB">0</span> votes</p>
+    <div style="background:#eee; border-radius:5px;">
+      <div id="barB" class="progress-bar" style="width:0%">0%</div>
+    </div>
+
+    <p>Candidate C: <span id="countC">0</span> votes</p>
+    <div style="background:#eee; border-radius:5px;">
+      <div id="barC" class="progress-bar" style="width:0%">0%</div>
+    </div>
+  </div>
+
+  <div class="admin-section">
+    <h3>Mock Admin Panel (UI Only)</h3>
+    <p>- Add/Remove Candidate buttons (UI only)</p>
+    <p>- Reset Votes (for demo)</p>
+    <button id="resetBtn">Reset Votes</button>
+  </div>
+</div>
+
+<script>
+  // JavaScript logic after all HTML has loaded
+  window.onload = function () {
+    let votes = {
+      A: parseInt(localStorage.getItem('votesA') || "0"),
+      B: parseInt(localStorage.getItem('votesB') || "0"),
+      C: parseInt(localStorage.getItem('votesC') || "0"),
+    };
+
+    function updateResults() {
+      const total = votes.A + votes.B + votes.C;
+      const percent = {
+        A: total ? Math.round((votes.A / total) * 100) : 0,
+        B: total ? Math.round((votes.B / total) * 100) : 0,
+        C: total ? Math.round((votes.C / total) * 100) : 0,
+      };
+
+      document.getElementById("countA").innerText = votes.A;
+      document.getElementById("countB").innerText = votes.B;
+      document.getElementById("countC").innerText = votes.C;
+
+      document.getElementById("barA").style.width = percent.A + "%";
+      document.getElementById("barA").innerText = percent.A + "%";
+
+      document.getElementById("barB").style.width = percent.B + "%";
+      document.getElementById("barB").innerText = percent.B + "%";
+
+      document.getElementById("barC").style.width = percent.C + "%";
+      document.getElementById("barC").innerText = percent.C + "%";
+    }
+
+    function disableButtons() {
+      document.getElementById("voteA").disabled = true;
+      document.getElementById("voteB").disabled = true;
+      document.getElementById("voteC").disabled = true;
+    }
+
+    function enableButtons() {
+      document.getElementById("voteA").disabled = false;
+      document.getElementById("voteB").disabled = false;
+      document.getElementById("voteC").disabled = false;
+    }
+
+    function handleVote(candidate) {
+      if (localStorage.getItem("voted")) {
+        alert("You have already voted!");
+        return;
+      }
+
+      votes[candidate]++;
+      localStorage.setItem(`votes${candidate}`, votes[candidate]);
+      localStorage.setItem("voted", "true");
+
+      alert("Thanks for voting!");
+      disableButtons();
+      updateResults();
+    }
+
+    function resetVotes() {
+      localStorage.removeItem("voted");
+      localStorage.setItem("votesA", "0");
+      localStorage.setItem("votesB", "0");
+      localStorage.setItem("votesC", "0");
+
+      votes = { A: 0, B: 0, C: 0 };
+      enableButtons();
+      updateResults();
+      alert("Votes have been reset.");
+    }
+
+    // Assign click events
+    document.getElementById("voteA").onclick = () => handleVote("A");
+    document.getElementById("voteB").onclick = () => handleVote("B");
+    document.getElementById("voteC").onclick = () => handleVote("C");
+    document.getElementById("resetBtn").onclick = resetVotes;
+
+    if (localStorage.getItem("voted")) {
+      disableButtons();
+    }
+
+    updateResults();
+  };
+</script>
+
+<footer style="background-color:#ECEFF1;padding:15px;text-allign:center; margin-top:50px; font-size:16px;color:#607D8B;font-family:sans-serif;border-top:1px; solid #CFD8DC;">
+Made by Jeet Thakkar | Internship Project - CodeShape IT Solution</footer>
+</body>
+</html>
